@@ -1,15 +1,37 @@
+import { ChakraProvider } from '@chakra-ui/react';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import theme from './theme';
+
+import DetailPage, { launchLoader } from './routes/DetailPage';
+import ErrorPage from './routes/ErrorPage';
+import Home, { loader as launchesLoader } from './routes/Home';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Home />,
+    errorElement: <ErrorPage />,
+    loader: launchesLoader,
+  },
+  {
+    path: '/launch/:id',
+    element: <DetailPage />,
+    loader: launchLoader,
+  },
+]);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <ChakraProvider theme={theme}>
+      <RouterProvider router={router} />
+    </ChakraProvider>
   </React.StrictMode>
 );
 
