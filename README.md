@@ -1,6 +1,8 @@
-# Getting Started with Create React App
+# SpaceX Launches
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A web application that uses the SpaceX API to display information about the company's launches, rockets, and capsules.
+
+Developed with TypeScript, React and Chakra UI.
 
 ## Available Scripts
 
