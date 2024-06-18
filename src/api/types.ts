@@ -1,12 +1,25 @@
-export interface Launch {
+export interface LaunchAPI {
   id: string;
-  patch: string;
-  missionName: string;
-  date: string;
-  details: string;
+  links: {
+    patch: {
+      small: string | null;
+      large: string | null;
+    };
+  };
+  crew: LaunchCrew[];
+  name: string;
+  date_local: string;
+  details: string | null;
   success: boolean;
   upcoming: boolean;
-  rocketName: string;
+  rocket: string;
+}
+
+export interface Launch extends LaunchAPI {
+  patchUrl?: string;
+  missionName: string;
+  date: string;
+  rocketName: string | null;
 }
 
 export interface LaunchCrew {

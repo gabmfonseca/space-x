@@ -40,7 +40,7 @@ const DetailPage = () => {
     date,
     details,
     missionName,
-    patch,
+    patchUrl,
     payloadsDetails,
     rocketName,
     success,
@@ -76,7 +76,7 @@ const DetailPage = () => {
               <Spacer />
               {(success || upcoming) && (
                 <Badge variant="outline" fontSize="1em">
-                  {upcoming ? 'Upcoming' : 'Launch succeeded'}
+                  {upcoming ? 'Upcoming' : 'Successful'}
                 </Badge>
               )}
             </Flex>
@@ -99,10 +99,13 @@ const DetailPage = () => {
           alignItems="start"
         >
           <Image
-            src={patch}
+            src={patchUrl}
             alt={`${missionName} patch`}
             fallbackSrc={FallbackPatch}
+            borderRadius="lg"
+            bg="#E2E8F0"
             objectFit="contain"
+            p="4"
           />
         </Flex>
       </SimpleGrid>

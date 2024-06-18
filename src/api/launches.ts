@@ -1,6 +1,7 @@
 import {
   CrewMember,
   Launch,
+  LaunchAPI,
   LaunchCrew,
   LaunchDetails,
   Payloads,
@@ -21,10 +22,10 @@ const getRocketName = async (id: string): Promise<string | null> => {
   }
 };
 
-const parseData = (data: any) => {
+const parseData = (data: LaunchAPI): Omit<Launch, 'rocketName'> => {
   return {
     ...data,
-    patch: data.links.patch.small,
+    patchUrl: data.links.patch.small || undefined,
     date: new Date(data.date_local).toLocaleDateString(),
     missionName: data.name,
   };
@@ -36,7 +37,7 @@ export const getAllLaunches = async (): Promise<Launch[]> => {
     const data = await response.json();
 
     const launches = await Promise.all(
-      data?.map(async (launch: any) => {
+      data?.map(async (launch: LaunchAPI) => {
         const rocketName = await getRocketName(launch.rocket);
         return { ...parseData(launch), rocketName };
       })

@@ -1,4 +1,4 @@
-import { Container, SimpleGrid, Stack, Text } from '@chakra-ui/react';
+import { Center, Container, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { getAllLaunches } from '../api/launches';
@@ -16,13 +16,17 @@ interface LoaderData {
 export const loader = async (): Promise<LoaderData> => {
   const launches = await getAllLaunches();
   const rockets = Array.from(
-    new Set(launches.map(({ rocketName }) => rocketName))
+    new Set(
+      launches.flatMap(({ rocketName }) =>
+        rocketName !== null ? [rocketName] : []
+      )
+    )
   );
   return { launches, rockets };
 };
 
-const filterRockets = (value: string, query: string) =>
-  value.toLowerCase().includes(query.trim().toLowerCase());
+const filterRockets = (value: string | null, query: string) =>
+  value !== null && value.toLowerCase().includes(query.trim().toLowerCase());
 
 const filterLaunches = (
   upcoming: boolean,
@@ -75,7 +79,9 @@ const Home = () => {
       </Container>
 
       {!results.length ? (
-        <Text>No results found</Text>
+        <Center>
+          <Text>No results found</Text>
+        </Center>
       ) : (
         <SimpleGrid spacing="10" columns={[1, null, 3]}>
           {results.map((launch) => (

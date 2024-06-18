@@ -16,7 +16,7 @@ import FallbackPatch from '../fallbackPatch.png';
 const LaunchCard = ({
   id,
   missionName,
-  patch,
+  patchUrl,
   date,
   details,
   rocketName,
@@ -26,13 +26,13 @@ const LaunchCard = ({
       <CardBody>
         <Flex justifyContent="center">
           <Image
-            src={patch}
+            src={patchUrl}
             alt={`${missionName} patch`}
             fallbackSrc={FallbackPatch}
             borderRadius="lg"
             bg="#E2E8F0"
             objectFit="contain"
-            p="2"
+            p="4"
           />
         </Flex>
         <Stack mt="6" spacing="2">
