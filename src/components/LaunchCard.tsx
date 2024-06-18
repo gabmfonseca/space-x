@@ -22,7 +22,7 @@ const LaunchCard = ({
   rocketName,
 }: Launch) => {
   return (
-    <Card key={id}>
+    <Card key={id} data-testid="launch-card">
       <CardBody>
         <Flex justifyContent="center">
           <Image

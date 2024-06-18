@@ -35,6 +35,7 @@ const Filters = ({ filter, handleFilterClick }: FilterProps) => {
           onClick={() => handleFilterClick(value)}
           isActive={value === filter}
           key={value}
+          data-testid={`filter-${value}`}
         >
           {label}
         </Button>

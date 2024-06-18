@@ -69,11 +69,7 @@ const Home = () => {
     <Layout>
       <Container mb="10">
         <Stack spacing="4">
-          <Search
-            options={rocketOptions}
-            query={query}
-            handleQueryChange={setQuery}
-          />
+          <Search options={rocketOptions} query={query} setQuery={setQuery} />
           <Filters filter={filter} handleFilterClick={setFilter} />
         </Stack>
       </Container>

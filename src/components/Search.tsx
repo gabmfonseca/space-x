@@ -1,9 +1,11 @@
 import { SearchIcon } from '@chakra-ui/icons';
 import {
   Box,
+  CloseButton,
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   List,
   ListItem,
   useOutsideClick,
@@ -13,26 +15,24 @@ import { useRef, useState } from 'react';
 interface SearchProps {
   query: string;
   options: string[];
-  handleQueryChange: (value: string) => void;
+  setQuery: (value: string) => void;
 }
 
-const Search = ({ query, options, handleQueryChange }: SearchProps) => {
+const Search = ({ query, options, setQuery }: SearchProps) => {
   const [listVisible, setListVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
 
-  const handleInputChange = (value: string) => {
-    handleQueryChange(value);
-  };
-
-  const handleOptionClick = (option: string) => {
-    handleQueryChange(option);
-    setListVisible(false);
+  const handleQueryChange = (option: string, close = true) => {
+    setQuery(option);
+    if (close) {
+      setListVisible(false);
+    }
   };
 
   const handleKeyDown = (key: string, option: string, isLast: boolean) => {
     if (key === 'Enter') {
-      handleOptionClick(option);
+      handleQueryChange(option);
     } else if (key === 'Tab' && isLast) {
       setListVisible(false);
     }
@@ -54,16 +54,26 @@ const Search = ({ query, options, handleQueryChange }: SearchProps) => {
     <Box pos="relative" ref={searchRef}>
       <InputGroup size="md">
         <InputLeftElement pointerEvents="none">
-          <SearchIcon color="gray.300" />
+          <SearchIcon color="gray.500" />
         </InputLeftElement>
         <Input
+          data-testid="search-input"
           ref={inputRef}
           value={query}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={(e) => handleQueryChange(e.target.value, false)}
           placeholder="Search by rocket name"
           onFocus={() => setListVisible(true)}
           onKeyDown={(e) => handleInputKeyDown(e.key)}
         />
+        {!!query.length && (
+          <InputRightElement>
+            <CloseButton
+              color="gray.500"
+              onClick={() => handleQueryChange('')}
+              data-testid="search-clear"
+            />
+          </InputRightElement>
+        )}
       </InputGroup>
       {listVisible && (
         <List
@@ -86,7 +96,7 @@ const Search = ({ query, options, handleQueryChange }: SearchProps) => {
               key={option}
               padding="4px"
               _hover={{ background: 'gray.100', cursor: 'pointer' }}
-              onClick={() => handleOptionClick(option)}
+              onClick={() => handleQueryChange(option)}
               tabIndex={0}
               onKeyDown={(e) =>
                 handleKeyDown(e.key, option, index === options.length - 1)
