@@ -1,76 +1,103 @@
 import { SearchIcon } from '@chakra-ui/icons';
 import {
-  Button,
-  Container,
-  HStack,
+  Box,
   Input,
   InputGroup,
   InputLeftElement,
-  Stack,
+  List,
+  ListItem,
+  useOutsideClick,
 } from '@chakra-ui/react';
+import { useRef, useState } from 'react';
 
 interface SearchProps {
-  search: string;
-  filter: string;
-  handleSearch: (value: string) => void;
-  handleFilterClick: (value: Filter) => void;
+  query: string;
+  options: string[];
+  handleQueryChange: (value: string) => void;
 }
 
-const filters = [
-  {
-    label: 'All launches',
-    value: 'all',
-  },
-  {
-    label: 'Upcoming',
-    value: 'upcoming',
-  },
-  {
-    label: 'Past',
-    value: 'past',
-  },
-  {
-    label: 'Successful',
-    value: 'success',
-  },
-] as const;
+const Search = ({ query, options, handleQueryChange }: SearchProps) => {
+  const [listVisible, setListVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const searchRef = useRef<HTMLDivElement | null>(null);
 
-export type Filter = (typeof filters)[number]['value'];
+  const handleInputChange = (value: string) => {
+    handleQueryChange(value);
+  };
 
-const Search = ({
-  search,
-  filter,
-  handleSearch,
-  handleFilterClick,
-}: SearchProps) => {
+  const handleOptionClick = (option: string) => {
+    handleQueryChange(option);
+    setListVisible(false);
+  };
+
+  const handleKeyDown = (key: string, option: string, isLast: boolean) => {
+    if (key === 'Enter') {
+      handleOptionClick(option);
+    } else if (key === 'Tab' && isLast) {
+      setListVisible(false);
+    }
+  };
+
+  const handleInputKeyDown = (key: string) => {
+    if (key === 'Enter') {
+      setListVisible(false);
+      inputRef.current?.blur();
+    }
+  };
+
+  useOutsideClick({
+    ref: searchRef,
+    handler: () => setListVisible(false),
+  });
+
   return (
-    <Container mb="10">
-      <Stack spacing="4">
-        <InputGroup size="md">
-          <InputLeftElement pointerEvents="none">
-            <SearchIcon color="gray.300" />
-          </InputLeftElement>
-          <Input
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search by rocket name"
-          />
-        </InputGroup>
-
-        <HStack flexWrap="wrap">
-          {filters.map(({ label, value }) => (
-            <Button
-              variant="outline"
-              onClick={() => handleFilterClick(value)}
-              isActive={value === filter}
-              key={value}
+    <Box pos="relative" ref={searchRef}>
+      <InputGroup size="md">
+        <InputLeftElement pointerEvents="none">
+          <SearchIcon color="gray.300" />
+        </InputLeftElement>
+        <Input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => handleInputChange(e.target.value)}
+          placeholder="Search by rocket name"
+          onFocus={() => setListVisible(true)}
+          onKeyDown={(e) => handleInputKeyDown(e.key)}
+        />
+      </InputGroup>
+      {listVisible && (
+        <List
+          mt={1}
+          border={options.length ? '1px' : 'none'}
+          borderColor="gray.200"
+          borderRadius="md"
+          pos="absolute"
+          zIndex="2"
+          top="100%"
+          left="0"
+          w="full"
+          transition="all 0.5s ease"
+          bgColor="white"
+          height={options.length ? 'auto' : '0'}
+          overflow="hidden"
+        >
+          {options.map((option, index) => (
+            <ListItem
+              key={option}
+              padding="4px"
+              _hover={{ background: 'gray.100', cursor: 'pointer' }}
+              onClick={() => handleOptionClick(option)}
+              tabIndex={0}
+              onKeyDown={(e) =>
+                handleKeyDown(e.key, option, index === options.length - 1)
+              }
             >
-              {label}
-            </Button>
+              {option}
+            </ListItem>
           ))}
-        </HStack>
-      </Stack>
-    </Container>
+        </List>
+      )}
+    </Box>
   );
 };
 

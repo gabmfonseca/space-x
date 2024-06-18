@@ -1,59 +1,88 @@
-import { SimpleGrid, Text } from '@chakra-ui/react';
+import { Container, SimpleGrid, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { getAllLaunches } from '../api/launches';
 import { Launch } from '../api/types';
+import Filters, { Filter } from '../components/Filters';
 import LaunchCard from '../components/LaunchCard';
 import Layout from '../components/Layout';
-import Search, { Filter } from '../components/Search';
+import Search from '../components/Search';
 
-export const loader = async (): Promise<Launch[]> => {
-  const data = await getAllLaunches();
-  return data;
+interface LoaderData {
+  launches: Launch[];
+  rockets: string[];
+}
+
+export const loader = async (): Promise<LoaderData> => {
+  const launches = await getAllLaunches();
+  const rockets = Array.from(
+    new Set(launches.map(({ rocketName }) => rocketName))
+  );
+  return { launches, rockets };
+};
+
+const filterRockets = (value: string, query: string) =>
+  value.toLowerCase().includes(query.trim().toLowerCase());
+
+const filterLaunches = (
+  upcoming: boolean,
+  success: boolean,
+  filter: string
+): boolean => {
+  switch (filter) {
+    case 'success':
+      return success;
+    case 'upcoming':
+      return upcoming;
+    case 'past':
+      return !upcoming;
+    default:
+      return true;
+  }
 };
 
 const Home = () => {
-  const allLaunches = useLoaderData() as Launch[];
-  const [filteredLaunches, setFilteredLaunches] = useState<Launch[]>([]);
-  const [search, setSearch] = useState('');
+  const { launches, rockets } = useLoaderData() as LoaderData;
+  const [results, setResults] = useState<Launch[]>([]);
+  const [rocketOptions, setRocketOptions] = useState<string[]>([]);
+  const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
 
   useEffect(() => {
-    setFilteredLaunches(allLaunches);
-  }, [allLaunches]);
+    const filteredRockets = rockets.filter((rocket) =>
+      filterRockets(rocket, query)
+    );
+    setRocketOptions(filteredRockets);
+  }, [query, rockets]);
 
   useEffect(() => {
-    let filtered = allLaunches
-      .filter(({ rocketName }) =>
-        rocketName.toLowerCase().includes(search.toLowerCase())
-      )
-      .filter(({ upcoming, success }) => {
-        if (filter === 'success') {
-          return success;
-        } else if (filter === 'upcoming') {
-          return upcoming;
-        } else if (filter === 'past') {
-          return !upcoming;
-        } else {
-          return true;
-        }
-      });
-    setFilteredLaunches(filtered);
-  }, [search, filter, allLaunches]);
+    let filteredLaunches = launches
+      .filter(({ rocketName }) => filterRockets(rocketName, query))
+      .filter(({ upcoming, success }) =>
+        filterLaunches(upcoming, success, filter)
+      );
+
+    setResults(filteredLaunches);
+  }, [query, filter, launches]);
 
   return (
     <Layout>
-      <Search
-        search={search}
-        filter={filter}
-        handleSearch={setSearch}
-        handleFilterClick={setFilter}
-      />
-      {!filteredLaunches.length ? (
+      <Container mb="10">
+        <Stack spacing="4">
+          <Search
+            options={rocketOptions}
+            query={query}
+            handleQueryChange={setQuery}
+          />
+          <Filters filter={filter} handleFilterClick={setFilter} />
+        </Stack>
+      </Container>
+
+      {!results.length ? (
         <Text>No results found</Text>
       ) : (
         <SimpleGrid spacing="10" columns={[1, null, 3]}>
-          {filteredLaunches.map((launch) => (
+          {results.map((launch) => (
             <LaunchCard {...launch} key={launch.id} />
           ))}
         </SimpleGrid>
